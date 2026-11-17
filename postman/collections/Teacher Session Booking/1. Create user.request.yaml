@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/users"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "fullName": "Sam Lee",
+      "email": "{{email}}",
+      "phone": "9876543210"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Created", () => pm.response.to.have.status(201));
+      if (pm.response.code === 201) pm.collectionVariables.set("userId", pm.response.json()._id);
+    language: text/javascript
+order: 1000

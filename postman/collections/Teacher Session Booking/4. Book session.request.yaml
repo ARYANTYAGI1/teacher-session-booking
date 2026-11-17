@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/sessions/{{sessionId}}/book"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "userId": "{{userId}}"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test("Booked", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().status).to.eql("BOOKED"); });
+    language: text/javascript
+order: 4000

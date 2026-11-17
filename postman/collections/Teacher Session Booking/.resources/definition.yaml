@@ -1,0 +1,22 @@
+$kind: collection
+description: Set teacherId from npm run seed:teacher, then run in order.
+variables:
+  baseUrl: http://localhost:3000
+  teacherId: ""
+  userId: ""
+  sessionId: ""
+  email: ""
+  startTime: ""
+  endTime: ""
+  dateTimestamp: ""
+scripts:
+  - type: http:beforeRequest
+    code: |-
+      if (pm.info.requestName === "1. Create user") {
+        const start = new Date(Date.now() + 86400000);
+        pm.collectionVariables.set("email", `sam.${Date.now()}@example.com`);
+        pm.collectionVariables.set("startTime", start.toISOString());
+        pm.collectionVariables.set("endTime", new Date(start.getTime() + 3600000).toISOString());
+        pm.collectionVariables.set("dateTimestamp", String(start.getTime()));
+      }
+    language: text/javascript

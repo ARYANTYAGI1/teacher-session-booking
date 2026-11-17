@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/sessions/available?dateTimestamp={{dateTimestamp}}"
+method: GET
+queryParams:
+  dateTimestamp: "{{dateTimestamp}}"
+scripts:
+  - type: afterResponse
+    code: pm.test("OK", () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 3000

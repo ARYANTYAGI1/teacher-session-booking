@@ -1,0 +1,218 @@
+{
+  "info": {
+    "name": "Teacher Session Booking",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Set teacherId from npm run seed:teacher, then run in order."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "teacherId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "sessionId",
+      "value": ""
+    },
+    {
+      "key": "email",
+      "value": ""
+    },
+    {
+      "key": "startTime",
+      "value": ""
+    },
+    {
+      "key": "endTime",
+      "value": ""
+    },
+    {
+      "key": "dateTimestamp",
+      "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.info.requestName === \"1. Create user\") {",
+          "  const start = new Date(Date.now() + 86400000);",
+          "  pm.collectionVariables.set(\"email\", `sam.${Date.now()}@example.com`);",
+          "  pm.collectionVariables.set(\"startTime\", start.toISOString());",
+          "  pm.collectionVariables.set(\"endTime\", new Date(start.getTime() + 3600000).toISOString());",
+          "  pm.collectionVariables.set(\"dateTimestamp\", String(start.getTime()));",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Create user",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Sam Lee\",\n  \"email\": \"{{email}}\",\n  \"phone\": \"9876543210\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Created\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"userId\", pm.response.json()._id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Create session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/sessions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teacherId\": \"{{teacherId}}\",\n  \"startTime\": \"{{startTime}}\",\n  \"endTime\": \"{{endTime}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Created\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"sessionId\", pm.response.json()._id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Available sessions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/sessions/available?dateTimestamp={{dateTimestamp}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"OK\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Book session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/sessions/{{sessionId}}/book",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Booked\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().status).to.eql(\"BOOKED\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Complete session",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": "{{baseUrl}}/sessions/{{sessionId}}/complete"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Completed\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().status).to.eql(\"COMPLETED\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. User sessions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/users/{{userId}}/sessions"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"OK\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
